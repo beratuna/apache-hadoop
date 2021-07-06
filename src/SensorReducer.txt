@@ -1,0 +1,25 @@
+import java.io.IOException;
+
+import org.apache.hadoop.io.ArrayWritable;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Reducer;
+
+public class SensorReducer extends Reducer<Text, MapResult, Text, Text>{
+
+    @Override
+    protected void reduce(Text key, Iterable<MapResult> values, Context context) throws IOException, InterruptedException {
+        int count = 0;
+        float total = 0;        
+        float min = 1000;
+        float max = -1000;        
+
+        for(MapResult value: values){
+        	count += value.getCount();
+        	total += value.getTotal();
+        	min = Math.min(min, value.getMin());
+        	max = Math.max(max, value.getMax());        	
+        }
+        context.write(key, new Text("" + count + ',' + min + ',' + max + ',' + (total/count) ));
+    }
+}
